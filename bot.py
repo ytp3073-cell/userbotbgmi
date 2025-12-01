@@ -1,16 +1,16 @@
-# RoseUserBot v6.0 — Replit Final Build (Full Fix)
+# 🌹 RoseUserBot v6.1 — Replit Final Build (FULL FIX)
 # ✅ VC join/play (DM reply)
 # ✅ YouTube audio: .playlink / .queue / .skip / .pause / .resume / .stop / .loop
 # ✅ .spam, .senddm, .sendfile, .bc, .kick, .ban, .unban, .invite, .start, .help, .pink
-# ✅ Compatible with py-tgcalls 2.2.8
-# 🔧 Auto-installs required libs on start
+# ✅ Compatible with pytgcalls==2.2.8
+# 🔧 Auto-installs required libs
 
 import os, sys, subprocess, asyncio, time, logging
 
 # ---------------- AUTO INSTALL ----------------
 REQUIRED = [
     "telethon",
-    "py-tgcalls==2.2.8",
+    "pytgcalls==2.2.8",
     "yt-dlp",
     "ffmpeg-python",
     "aiohttp",
@@ -33,8 +33,246 @@ from telethon import TelegramClient, events, functions
 from telethon.tl.functions.channels import GetParticipantRequest, InviteToChannelRequest, EditBannedRequest
 from telethon.tl.types import ChatBannedRights, ChannelParticipantAdmin, ChannelParticipantCreator
 
-# ✅ Correct import for py-tgcalls 2.2.8
 from pytgcalls import PyTgCalls, idle
+from pytgcalls.types.input_stream import AudioPiped
+from pytgcalls.types import AudioQuality
+
+import yt_dlp
+
+# ---------------- CONFIG ----------------
+API_ID = 32581893
+API_HASH = "86d15530bb76890fbed3453d820e94f5"
+SESSION_NAME = "RoseUserBot"
+
+BASE_DIR = "/tmp/rose_v6"
+VOICE_DIR = os.path.join(BASE_DIR, "tracks")
+VC_FILE = os.path.join(BASE_DIR, "last_vc.txt")
+SILENCE_FILE = os.path.join(BASE_DIR, "silence.mp3")
+
+os.makedirs(VOICE_DIR, exist_ok=True)
+logging.basicConfig(level=logging.WARNING)
+
+client = TelegramClient(SESSION_NAME, API_ID, API_HASH)
+call_py = PyTgCalls(client)
+
+OWNER_ID = None
+LAST_VC = None
+play_queue = asyncio.Queue()
+current_track = None
+playing = False
+paused = False
+loop_current = False
+skip_flag = False
+playback_task = None
+
+# ---------------- HELPERS ----------------
+async def get_owner_id():
+    global OWNER_ID
+    if OWNER_ID:
+        return OWNER_ID
+    me = await client.get_me()
+    OWNER_ID = me.id
+    return OWNER_ID
+
+async def is_owner(uid):
+    return uid == await get_owner_id()
+
+async def is_admin(chat_id, uid):
+    try:
+        part = (await client(GetParticipantRequest(chat_id, uid))).participant
+        return isinstance(part, (ChannelParticipantAdmin, ChannelParticipantCreator))
+    except Exception:
+        return False
+
+def save_vc(gid: int):
+    with open(VC_FILE, "w") as f:
+        f.write(str(gid))
+
+def load_vc():
+    if os.path.exists(VC_FILE):
+        try:
+            with open(VC_FILE) as f:
+                return int(f.read().strip() or 0)
+        except Exception:
+            return None
+    return None
+
+def ensure_silence():
+    if not os.path.exists(SILENCE_FILE):
+        print("🎧 Generating silence.mp3 ...")
+        subprocess.run(
+            [
+                "ffmpeg",
+                "-f", "lavfi",
+                "-i", "anullsrc=r=44100:cl=mono",
+                "-t", "1",
+                SILENCE_FILE,
+            ],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
+
+def cleanup_file(path):
+    try:
+        if path and os.path.exists(path):
+            os.remove(path)
+    except Exception:
+        pass
+
+ensure_silence()
+
+# ---------------- YT AUDIO DOWNLOAD ----------------
+def download_audio_from_youtube(url: str):
+    ts = int(time.time() * 1000)
+    out_template = os.path.join(VOICE_DIR, f"yt_{ts}.%(ext)s")
+    ydl_opts = {
+        "format": "bestaudio/best",
+        "outtmpl": out_template,
+        "quiet": True,
+        "no_warnings": True,
+        "noplaylist": True,
+        "geo_bypass": True,
+        "postprocessors": [{
+            "key": "FFmpegExtractAudio",
+            "preferredcodec": "mp3",
+            "preferredquality": "192",
+        }],
+    }
+    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+        info = ydl.extract_info(url, download=True)
+    path = None
+    for f in os.listdir(VOICE_DIR):
+        if f.startswith(f"yt_{ts}") and f.endswith(".mp3"):
+            path = os.path.join(VOICE_DIR, f)
+            break
+    if not path:
+        raise RuntimeError("Downloaded file not found.")
+    title = info.get("title", "Unknown Title")
+    duration = int(info.get("duration") or 0)
+    return {"title": title, "path": path, "duration": duration if duration > 0 else 60, "source": url}
+
+# ---------------- PLAYBACK LOOP ----------------
+async def playback_loop():
+    global current_track, playing, paused, loop_current, skip_flag
+    while True:
+        track = await play_queue.get()
+        current_track = track
+        try:
+            if not LAST_VC:
+                cleanup_file(track.get("path"))
+                current_track = None
+                continue
+            await call_py.change_stream(
+                LAST_VC,
+                AudioPiped(track["path"], audio_parameters=AudioQuality.STANDARD)
+            )
+            playing = True
+            paused = False
+            skip_flag = False
+            duration = int(track.get("duration") or 60)
+            elapsed = 0
+            while elapsed < duration:
+                await asyncio.sleep(1)
+                elapsed += 1
+                if skip_flag:
+                    skip_flag = False
+                    break
+            if loop_current and not skip_flag:
+                await play_queue.put(track)
+            else:
+                cleanup_file(track.get("path"))
+        except Exception as e:
+            print("Playback error:", e)
+            cleanup_file(track.get("path"))
+        finally:
+            current_track = None
+            playing = False
+            paused = False
+
+# ---------------- BASIC COMMANDS ----------------
+@client.on(events.NewMessage(pattern=r"^\.start$"))
+async def cmd_start(ev):
+    me = await client.get_me()
+    await ev.reply(f"🌹 **RoseUserBot v6.1 (Replit)**\n👑 Logged in as: @{me.username or me.first_name}\n📘 Use `.help` to see commands.")
+
+@client.on(events.NewMessage(pattern=r"^\.pink$"))
+async def cmd_pink(ev):
+    await ev.reply("💖 RoseUserBot is online & ready.")
+
+@client.on(events.NewMessage(pattern=r"^\.help$"))
+async def cmd_help(ev):
+    await ev.reply(
+        "**RoseUserBot v6.1 — Commands**\n\n"
+        "🎧 VC / Music\n"
+        "`.joinvc <group_id>` — Join VC\n"
+        "`.leavevc` — Leave VC\n"
+        "`.play` — Reply to a voice to play in VC\n"
+        "`.playlink <YouTube_URL>` — Download & play audio\n"
+        "`.queue`, `.skip`, `.pause`, `.resume`, `.stop`, `.loop on|off`\n\n"
+        "📩 Messaging\n"
+        "`.senddm <id> <text>`, `.sendfile <id> <filename>`, `.bc <id>`\n\n"
+        "🛡️ Admin\n"
+        "`.kick @user`, `.ban @user`, `.unban @user`, `.invite @user`\n\n"
+        "🔥 Spam\n"
+        "`.spam <delay> <count> <msg>`, `.stopspam`"
+    )
+
+# ---------------- VC JOIN / LEAVE ----------------
+@client.on(events.NewMessage(pattern=r"^\.joinvc(?:\s+(-?\d+))?$"))
+async def cmd_joinvc(ev):
+    global LAST_VC
+    if not await is_owner(ev.sender_id):
+        return await ev.reply("❌ Only owner can use this.")
+    gid = ev.pattern_match.group(1)
+    if not gid:
+        return await ev.reply("Usage: `.joinvc <group_id>`")
+    gid = int(gid)
+    ensure_silence()
+    try:
+        await call_py.join_voice_chat(
+            gid,
+            AudioPiped(SILENCE_FILE, audio_parameters=AudioQuality.STANDARD)
+        )
+        LAST_VC = gid
+        save_vc(gid)
+        await ev.reply(f"✅ Joined VC `{gid}`.\nUse `.playlink` or reply to a voice with `.play`.")
+    except Exception as e:
+        await ev.reply(f"❌ Join VC failed: `{e}`")
+
+@client.on(events.NewMessage(pattern=r"^\.leavevc$"))
+async def cmd_leavevc(ev):
+    global LAST_VC
+    if not await is_owner(ev.sender_id):
+        return await ev.reply("❌ Only owner.")
+    if not LAST_VC:
+        LAST_VC = load_vc()
+    if not LAST_VC:
+        return await ev.reply("⚠️ Not in VC.")
+    try:
+        await call_py.leave_voice_chat(LAST_VC)
+    except Exception:
+        pass
+    LAST_VC = None
+    open(VC_FILE, "w").close()
+    await ev.reply("👋 Left VC.")
+
+# ---------------- RUN ----------------
+async def main():
+    global LAST_VC, playback_task
+    await client.start()
+    await call_py.start()
+    LAST_VC = load_vc()
+    playback_task = asyncio.create_task(playback_loop())
+    me = await client.get_me()
+    print(f"✅ Logged in as {me.first_name} (@{me.username})")
+    print("🌹 RoseUserBot v6.1 running successfully.")
+    await idle()
+
+if __name__ == "__main__":
+    try:
+        asyncio.run(main())
+    except KeyboardInterrupt:
+        print("❌ Stopped manually.")from pytgcalls import PyTgCalls, idle
 from pytgcalls.types.input_stream import AudioPiped
 from pytgcalls.types import AudioQuality
 
