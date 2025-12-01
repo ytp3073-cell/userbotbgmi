@@ -34,9 +34,9 @@ from telethon.tl.functions.channels import GetParticipantRequest, InviteToChanne
 from telethon.tl.types import ChatBannedRights, ChannelParticipantAdmin, ChannelParticipantCreator
 
 # ✅ Correct import for py-tgcalls 2.2.8
-from py_tgcalls import PyTgCalls, idle
-from py_tgcalls.types.input_stream import AudioPiped
-from py_tgcalls.types import AudioQuality
+from pytgcalls import PyTgCalls, idle
+from pytgcalls.types.input_stream import AudioPiped
+from pytgcalls.types import AudioQuality
 
 import yt_dlp
 
