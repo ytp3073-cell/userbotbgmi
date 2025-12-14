@@ -16,28 +16,21 @@ HTML = """
   --bg1:#0f0c29;
   --bg2:#302b63;
   --bg3:#ff4ecd;
-
   --card:rgba(255,255,255,0.16);
   --text:#ffffff;
-
   --btn1:#ff0844;
   --btn2:#ff512f;
-
   --box:rgba(0,0,0,.45);
   --glow:#ff2f6d;
 }
-
 body.light{
   --bg1:#ffecec;
   --bg2:#ffd6e0;
   --bg3:#fff0f5;
-
   --card:rgba(255,255,255,0.97);
   --text:#000;
-
   --btn1:#ff3b3b;
   --btn2:#ff6a6a;
-
   --box:#ffe9ef;
   --glow:#ff3b3b;
 }
@@ -59,7 +52,7 @@ body{
   overflow:hidden;
 }
 
-/* 🔁 REPEATED + MOVING WATERMARK */
+/* 🔁 MOVING WATERMARK */
 body::before{
   content:"Devlaper TELEGRAM USERNAME @BAN8T  •  ";
   position:fixed;
@@ -74,21 +67,13 @@ body::before{
   z-index:0;
   animation:waterMove 60s linear infinite;
 }
-
-/* Mobile watermark smaller */
 @media (max-width:600px){
-  body::before{
-    font-size:14px;
-    letter-spacing:2px;
-    animation-duration:80s;
-  }
+  body::before{font-size:14px;animation-duration:80s;}
 }
-
 @keyframes waterMove{
   0%{transform:translateX(0) rotate(-25deg)}
   100%{transform:translateX(-50%) rotate(-25deg)}
 }
-
 @keyframes bgMove{
   0%{background-position:0% 50%}
   50%{background-position:100% 50%}
@@ -114,15 +99,38 @@ body::before{
 /* HEADER */
 .topbar{
   display:flex;
-  justify-content:space-between;
+  flex-direction:column;
   align-items:center;
-  margin-bottom:18px;
+  margin-bottom:22px;
 }
-h1{margin:0;font-size:24px}
+.topbar h1{
+  margin:0;
+  font-size:26px;
+  letter-spacing:1px;
+}
+.dev-name{
+  margin-top:6px;
+  font-size:13px;
+  letter-spacing:2px;
+  animation:devGlow 2.5s ease-in-out infinite;
+}
+.dev-name a{
+  color:var(--glow);
+  text-decoration:none;
+}
+@keyframes devGlow{
+  0%{text-shadow:0 0 6px var(--glow);opacity:.6}
+  50%{text-shadow:0 0 18px var(--glow);opacity:1}
+  100%{text-shadow:0 0 6px var(--glow);opacity:.6}
+}
 
+/* TOGGLE */
 .toggle{
+  position:absolute;
+  top:22px;
+  right:22px;
   cursor:pointer;
-  font-size:14px;
+  font-size:13px;
   padding:8px 18px;
   border-radius:30px;
   background:linear-gradient(135deg,var(--btn1),var(--btn2));
@@ -149,7 +157,6 @@ h1{margin:0;font-size:24px}
 /* INPUT + BUTTON */
 .section{display:none}
 .section.active{display:block}
-
 input{
   width:100%;
   padding:15px;
@@ -158,7 +165,6 @@ input{
   margin-bottom:10px;
   font-size:15px;
 }
-
 button{
   width:100%;
   padding:15px;
@@ -171,10 +177,7 @@ button{
   color:#fff;
   box-shadow:0 6px 20px rgba(255,47,109,.45);
 }
-button.small{
-  padding:12px;
-  font-size:13px;
-}
+button.small{padding:12px;font-size:13px}
 .actions{display:flex;gap:10px}
 
 /* RESULT */
@@ -216,12 +219,6 @@ pre{
   background:linear-gradient(135deg,#ff0844,#ff512f);
   -webkit-background-clip:text;
   -webkit-text-fill-color:transparent;
-  animation:glow 3s ease-in-out infinite;
-}
-@keyframes glow{
-  0%{text-shadow:0 0 10px #ff0844}
-  50%{text-shadow:0 0 28px #ff512f}
-  100%{text-shadow:0 0 10px #ff0844}
 }
 
 /* BACK TO TOP */
@@ -243,11 +240,12 @@ pre{
 </style>
 </head>
 
-<body class="dark">
+<body>
 
 <div class="card" id="top">
   <div class="topbar">
-    <h1>🔍 INFO LOOKUP</h1>
+    <h1>OGGY INFO SITE</h1>
+    <div class="dev-name">Developer : <a href="https://t.me/BAN8T" target="_blank">@BAN8T</a></div>
     <div class="toggle" onclick="toggleMode()">🌙 / ☀️</div>
   </div>
 
@@ -289,7 +287,17 @@ pre{
 let autoClearTimer=null;
 let historyData=[];
 
-function toggleMode(){document.body.classList.toggle("light");}
+/* remember theme */
+if(localStorage.getItem("theme")==="light"){
+  document.body.classList.add("light");
+}
+
+function toggleMode(){
+  document.body.classList.toggle("light");
+  localStorage.setItem("theme",
+    document.body.classList.contains("light")?"light":"dark");
+}
+
 function tabSwitch(id,el){
  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
