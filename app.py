@@ -780,7 +780,7 @@ def track():
         return jsonify({"success": False, "message": "Invalid mobile number"})
 
     try:
-        api_url = f"https://numapi.anshapi.workers.dev/?num={num}"
+        api_url = f"https://darkie.x10.mx/numapi.php?action=api&key=NEXTGEN&number=num"
         response = requests.get(api_url, timeout=15)
         api = response.json()
 
