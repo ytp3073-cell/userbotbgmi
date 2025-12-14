@@ -16,23 +16,31 @@ HTML = """
   --bg1:#0f0c29;
   --bg2:#302b63;
   --bg3:#ff4ecd;
-  --card:rgba(255,255,255,0.14);
+
+  --card:rgba(255,255,255,0.16);
   --text:#ffffff;
-  --btn1:#00c6ff;
-  --btn2:#ff4ecd;
+
+  /* 🔴 COOL RED BUTTONS */
+  --btn1:#ff0844;
+  --btn2:#ff512f;
+
   --box:rgba(0,0,0,.45);
-  --glow:#ff4ecd;
+  --glow:#ff2f6d;
 }
+
 body.light{
-  --bg1:#e6f0ff;
-  --bg2:#ffd6f0;
-  --bg3:#cce0ff;
-  --card:rgba(255,255,255,0.95);
+  --bg1:#ffecec;
+  --bg2:#ffd6e0;
+  --bg3:#fff0f5;
+
+  --card:rgba(255,255,255,0.97);
   --text:#000;
-  --btn1:#1e90ff;
-  --btn2:#ff4ecd;
-  --box:#eef3ff;
-  --glow:#ff4ecd;
+
+  --btn1:#ff3b3b;
+  --btn2:#ff6a6a;
+
+  --box:#ffe9ef;
+  --glow:#ff3b3b;
 }
 
 *{box-sizing:border-box;font-family:'Segoe UI',sans-serif}
@@ -55,78 +63,94 @@ body{
   100%{background-position:0% 50%}
 }
 
+/* CARD */
 .card{
   width:98%;
   max-width:640px;
-  padding:26px;
-  border-radius:20px;
+  min-height:88vh;
+  padding:40px 28px;
+  border-radius:24px;
   background:var(--card);
-  backdrop-filter:blur(20px);
-  box-shadow:0 0 60px rgba(255,78,205,.35);
+  backdrop-filter:blur(22px);
+  box-shadow:0 0 80px rgba(255,47,109,.35);
+  display:flex;
+  flex-direction:column;
 }
 
+/* HEADER */
 .topbar{
   display:flex;
   justify-content:space-between;
   align-items:center;
-  margin-bottom:12px;
+  margin-bottom:18px;
 }
-h1{margin:0;font-size:23px}
+h1{margin:0;font-size:24px}
 
 .toggle{
   cursor:pointer;
   font-size:14px;
-  padding:7px 14px;
-  border-radius:22px;
+  padding:8px 18px;
+  border-radius:30px;
   background:linear-gradient(135deg,var(--btn1),var(--btn2));
-  color:#000;
+  color:#fff;
 }
 
-.tabs{display:flex;margin:14px 0}
+/* TABS */
+.tabs{display:flex;margin:20px 0}
 .tab{
   flex:1;
-  padding:13px;
+  padding:14px;
   cursor:pointer;
-  border-radius:14px;
-  background:rgba(255,255,255,.12);
+  border-radius:18px;
+  background:rgba(255,255,255,.18);
   color:var(--text);
   text-align:center;
 }
 .tab.active{
   background:linear-gradient(135deg,var(--btn1),var(--btn2));
-  color:#000;
+  color:#fff;
   font-weight:bold;
 }
 
+/* INPUT + BUTTON */
 .section{display:none}
 .section.active{display:block}
 
 input{
   width:100%;
-  padding:13px;
-  border-radius:12px;
+  padding:15px;
+  border-radius:16px;
   border:none;
-  margin-bottom:8px;
+  margin-bottom:10px;
+  font-size:15px;
 }
 
 button{
   width:100%;
-  padding:13px;
+  padding:15px;
   border:none;
-  border-radius:14px;
+  border-radius:18px;
   background:linear-gradient(135deg,var(--btn1),var(--btn2));
   font-weight:bold;
   cursor:pointer;
-  margin-bottom:6px;
-  color:#000;
+  margin-bottom:8px;
+  color:#fff;
+  box-shadow:0 6px 20px rgba(255,47,109,.45);
 }
-button.small{padding:10px;font-size:13px}
-.actions{display:flex;gap:8px}
+button:hover{
+  transform:scale(1.02);
+}
+button.small{
+  padding:12px;
+  font-size:13px;
+}
+.actions{display:flex;gap:10px}
 
+/* RESULT */
 pre{
   background:var(--box);
-  padding:15px;
-  border-radius:14px;
+  padding:16px;
+  border-radius:16px;
   max-height:260px;
   overflow-y:auto;
   white-space:pre-wrap;
@@ -134,12 +158,13 @@ pre{
   font-size:13px;
 }
 
+/* HISTORY */
 .history{
   display:none;
-  margin-top:10px;
+  margin-top:14px;
   background:var(--box);
-  padding:10px;
-  border-radius:14px;
+  padding:12px;
+  border-radius:16px;
   font-size:12px;
   max-height:160px;
   overflow-y:auto;
@@ -149,36 +174,40 @@ pre{
   padding:4px 0;
 }
 
+/* FOOTER */
 .footer{
+  margin-top:auto;
   text-align:center;
-  margin-top:18px;
+  padding-top:22px;
   font-size:13px;
   letter-spacing:2px;
   font-weight:bold;
-  background:linear-gradient(135deg,#00c6ff,#ff4ecd);
+  background:linear-gradient(135deg,#ff0844,#ff512f);
   -webkit-background-clip:text;
   -webkit-text-fill-color:transparent;
   animation:glow 3s ease-in-out infinite;
 }
 @keyframes glow{
-  0%{text-shadow:0 0 8px #00c6ff}
-  50%{text-shadow:0 0 20px #ff4ecd}
-  100%{text-shadow:0 0 8px #00c6ff}
+  0%{text-shadow:0 0 10px #ff0844}
+  50%{text-shadow:0 0 28px #ff512f}
+  100%{text-shadow:0 0 10px #ff0844}
 }
 
+/* BACK TO TOP */
 #topBtn{
   position:fixed;
-  bottom:24px;
-  right:24px;
+  bottom:26px;
+  right:26px;
   background:linear-gradient(135deg,var(--btn1),var(--btn2));
   border:none;
   border-radius:50%;
-  width:62px;
-  height:62px;
+  width:66px;
+  height:66px;
   cursor:pointer;
   font-size:26px;
   display:none;
-  box-shadow:0 0 25px rgba(255,78,205,.8);
+  color:#fff;
+  box-shadow:0 0 30px rgba(255,47,109,.9);
 }
 </style>
 </head>
@@ -277,16 +306,14 @@ def home():
 
 @app.route("/api/mobile")
 def mobile_api():
-    number = request.args.get("number")
     return jsonify(requests.get(
-        f"https://darkie.x10.mx/numapi.php?action=api&key=NEXTGEN&number={number}",
+        f"https://darkie.x10.mx/numapi.php?action=api&key=NEXTGEN&number={request.args.get('number')}",
         timeout=15
     ).json())
 
 @app.route("/api/aadhaar")
 def aadhaar_api():
-    a = request.args.get("aadhar")
     return jsonify(requests.get(
-        f"https://darkie.x10.mx/numapi.php?action=api&key=aa89dd725a6e5773ed4384fce8103d8a&aadhar={a}",
+        f"https://darkie.x10.mx/numapi.php?action=api&key=aa89dd725a6e5773ed4384fce8103d8a&aadhar={request.args.get('aadhar')}",
         timeout=15
     ).json())
