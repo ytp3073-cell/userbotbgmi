@@ -3,14 +3,14 @@ import requests
 
 app = Flask(__name__)
 
-# code by abbas
+# code by OGGY BHAI
 HTML_TEMPLATE = '''
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mobile Tracker Pro - ABBAS</title>
+    <title>Mobile Tracker Pro - OGGY BHAI</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
@@ -479,7 +479,7 @@ HTML_TEMPLATE = '''
                 <i class="fas fa-mobile-alt"></i>
             </div>
             <h1>Mobile Tracker Pro</h1>
-            <p class="subtitle">Powered by ABBAS</p>
+            <p class="subtitle">Powered by OGGY BHAI</p>
         </header>
 
         <main>
@@ -529,7 +529,7 @@ HTML_TEMPLATE = '''
         </main>
 
         <footer class="footer">
-            <p>© 2025 Mobile Tracker Pro | Developed by <a href="#">ABBAS</a></p>
+            <p>© 2025 Mobile Tracker Pro | Developed by <a href="#">OGGY BHAI</a></p>
             <p>Join our Telegram: <a href="#">@BAN8T</a></p>
         </footer>
     </div>
@@ -802,6 +802,6 @@ def track():
 # Pydroid only
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8080)
-#leaked by abbas 
+#leaked by OGGY BHAI 
 
 # join @BAN8T 
