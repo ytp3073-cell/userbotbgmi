@@ -49,10 +49,9 @@ body{
   100%{background-position:0% 50%}
 }
 
-/* 🔷 CARD WIDTH INCREASED */
 .card{
   width:98%;
-  max-width:620px;          /* 👈 pehle 500px tha */
+  max-width:620px;
   padding:24px;
   border-radius:18px;
   background:var(--card);
@@ -74,7 +73,7 @@ h1{margin:0;font-size:22px}
 
 .tabs{display:flex;margin:12px 0}
 .tab{
-  flex:1;padding:12px;cursor:pointer;   /* थोड़ा padding बढ़ाया */
+  flex:1;padding:12px;cursor:pointer;
   border:1px solid rgba(255,255,255,.3);
   background:transparent;color:var(--text);
   text-align:center;
@@ -101,26 +100,27 @@ button{
 button.small{padding:9px;font-size:13px}
 .actions{display:flex;gap:8px}
 
-/* 🔷 RESULT BOX HEIGHT INCREASED (THODI SCROLL) */
+/* RESULT */
 pre{
   background:var(--box);
   padding:14px;
   border-radius:10px;
-  max-height:260px;          /* 👈 pehle 180px tha */
+  max-height:260px;
   overflow-y:auto;
   white-space:pre-wrap;
   word-break:break-word;
   font-size:13px;
 }
 
-/* HISTORY (SAFE) */
+/* HISTORY */
 .history{
+  display:none;
   margin-top:10px;
   background:var(--box);
   padding:10px;
   border-radius:10px;
   font-size:12px;
-  max-height:140px;
+  max-height:160px;
   overflow-y:auto;
 }
 .history div{
@@ -141,27 +141,29 @@ pre{
 @keyframes glow{
   0%{text-shadow:0 0 5px var(--glow);opacity:.6}
   50%{
-    text-shadow:0 0 10px var(--glow),
-                0 0 20px var(--glow),
-                0 0 30px var(--glow);
+    text-shadow:
+      0 0 10px var(--glow),
+      0 0 20px var(--glow),
+      0 0 30px var(--glow);
     opacity:1
   }
   100%{text-shadow:0 0 5px var(--glow);opacity:.6}
 }
 
-/* BACK TO TOP */
+/* BACK TO TOP (BIGGER) */
 #topBtn{
   position:fixed;
-  bottom:20px;
-  right:20px;
+  bottom:24px;
+  right:24px;
   background:linear-gradient(135deg,var(--btn1),var(--btn2));
   border:none;
   border-radius:50%;
-  width:45px;
-  height:45px;
+  width:60px;
+  height:60px;
   cursor:pointer;
-  font-size:18px;
+  font-size:26px;
   display:none;
+  box-shadow:0 0 20px rgba(0,198,255,.8);
 }
 </style>
 </head>
@@ -195,6 +197,11 @@ pre{
   </div>
 
   <pre id="out">Result will appear here...</pre>
+
+  <div class="actions">
+    <button class="small" onclick="toggleHistory()">🕘 History</button>
+    <button class="small" onclick="clearHistory()">🗑️ Clear History</button>
+  </div>
 
   <div class="history" id="history"></div>
 
@@ -243,12 +250,28 @@ function copyResult(){
   alert("Result copied");
 }
 
+/* HISTORY FUNCTIONS */
+function toggleHistory(){
+  history.style.display =
+    history.style.display === "none" ? "block" : "none";
+}
+
 function addHistory(text){
   historyData.unshift(text);
   if(historyData.length > 20) historyData.pop();
+  renderHistory();
+}
+
+function renderHistory(){
   history.innerHTML = historyData.map(h=>"<div>"+h+"</div>").join("");
 }
 
+function clearHistory(){
+  historyData = [];
+  renderHistory();
+}
+
+/* API CALLS */
 function checkMobile(){
   if(!m.value) return;
   fetch('/api/mobile?number='+m.value)
@@ -263,6 +286,7 @@ function checkAadhaar(){
     .then(d=>showResult(d,"🆔 "+a.value));
 }
 
+/* BACK TO TOP */
 window.onscroll = function(){
   topBtn.style.display = window.scrollY > 200 ? "block" : "none";
 }
